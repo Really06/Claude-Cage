@@ -87,7 +87,8 @@ try {
         if (-not (Test-Path -LiteralPath (Join-Path $qemuRoot 'share') -PathType Container)) {
             $qemuRoot = Split-Path $qemuExe.DirectoryName -Parent
         }
-        Move-Item -LiteralPath $qemuRoot -Destination $qemuTarget
+        New-Item -ItemType Directory -Path $qemuTarget -Force | Out-Null
+        Copy-Item -LiteralPath (Join-Path $qemuRoot '*') -Destination $qemuTarget -Recurse -Force
     } else {
         Move-Item -LiteralPath $qemuStage -Destination $qemuTarget
     }
