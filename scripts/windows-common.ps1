@@ -40,7 +40,9 @@ function Get-VerifiedDependency {
         }
     }
     $actual = (Get-FileHash -LiteralPath $path -Algorithm $Dependency.algorithm).Hash
-    if ($actual -ne $Dependency.hash) { throw "Dependency checksum mismatch: $($Dependency.file). Remove the cached file and retry." }
+    if ($actual -ne $Dependency.hash) {
+        throw "Dependency checksum mismatch: $($Dependency.file). Expected $($Dependency.hash), got $actual. Remove the cached file and retry."
+    }
     return $path
 }
 
