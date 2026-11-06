@@ -2,6 +2,7 @@ import { PasswordVaultSettings } from "./password-vault";
 import { KeyRound } from "lucide-react";
 import { InlineSelect } from "./inline-select";
 import { clientKeyboard, isRemoteClient, saveClientKeyboard } from "./client-context.mjs";
+import { isWindows } from "./platform.mjs";
 import { shortcut, usesControl } from "./platform.mjs";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -76,6 +77,7 @@ export function SettingsPanel({
     "browser_language",
     "auto_timezone",
     "auto_language",
+    "windows_tcg",
     "exit_policy",
   ].some((k) =>
     k === "exit_policy"
@@ -592,6 +594,25 @@ export function SettingsPanel({
                 </p>
                 <EnvironmentVersions status={status} onConfirm={onConfirm} />
                 <ResourceSettings status={status} onConfirm={onConfirm} />
+                {isWindows && (
+                  <div className="settings-group">
+                    <h4>虚拟机启动兼容性</h4>
+                    <label className="checkbox-row">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(draft.windows_tcg)}
+                        onChange={(e) => update("windows_tcg", e.target.checked)}
+                      />
+                      <span>
+                        <strong>临时使用 TCG 软件虚拟化</strong>
+                        <small>
+                          默认使用 Windows WHPX。仅当 WHPX 启动失败时勾选此项；TCG
+                          会明显变慢，保存后需要重启环境。
+                        </small>
+                      </span>
+                    </label>
+                  </div>
+                )}
  <DiagnosticSettings />
                 {status.can_restore && (
                   <button

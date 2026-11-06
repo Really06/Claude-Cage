@@ -91,6 +91,7 @@ type Settings struct {
 	Timezone        string          `json:"timezone"`
 	Locale          string          `json:"locale"`
 	BrowserLanguage string          `json:"browser_language"`
+	WindowsTCG      bool            `json:"windows_tcg"`
 	ExitPolicy      cage.ExitPolicy `json:"exit_policy"`
 }
 type Location struct {
@@ -141,13 +142,13 @@ func writePrivate(path string, v any) error {
 func settingsView(c cage.Config, p Preferences) Settings {
 	p.BrowserHomeURL = browserHomeURL(p)
 	p.ClaudeTerminalCommand = claudeTerminalCommand(p)
-	return Settings{Preferences: p, DNSURL: c.DNSURL, Timezone: c.Timezone, Locale: c.Locale, BrowserLanguage: c.BrowserLanguage, ExitPolicy: c.ExitPolicy.Normalized()}
+	return Settings{Preferences: p, DNSURL: c.DNSURL, Timezone: c.Timezone, Locale: c.Locale, BrowserLanguage: c.BrowserLanguage, WindowsTCG: c.WindowsTCG, ExitPolicy: c.ExitPolicy.Normalized()}
 }
 func proposedSettings(input Settings, old cage.Config, profile string) (cage.Config, Preferences, error) {
 	if input.ExitPolicy == (cage.ExitPolicy{}) {
 		input.ExitPolicy = old.ExitPolicy
 	}
-	c := cage.Config{ProxyURL: old.ProxyURL, ProxyRevision: old.ProxyRevision, DNSURL: input.DNSURL, Timezone: input.Timezone, Locale: input.Locale, BrowserLanguage: input.BrowserLanguage, ExitPolicy: input.ExitPolicy.Normalized()}
+	c := cage.Config{ProxyURL: old.ProxyURL, ProxyRevision: old.ProxyRevision, DNSURL: input.DNSURL, Timezone: input.Timezone, Locale: input.Locale, BrowserLanguage: input.BrowserLanguage, WindowsTCG: input.WindowsTCG, ExitPolicy: input.ExitPolicy.Normalized()}
 	if err := c.Validate(); err != nil {
 		return c, input.Preferences, err
 	}

@@ -1,24 +1,22 @@
-Subject: [PATCH] qemu: use TCG on Windows until the bundled WHPX is fixed
+Subject: [PATCH] qemu: allow an explicit Windows TCG fallback
 
-QEMU 11.1.0 can fail to initialize WHPX on supported Windows 11 hosts with
-`failed to initialize whpx: Invalid argument`. Use software emulation until
-the bundled QEMU is upgraded so the environment remains usable.
+Keep WHPX as the default Windows accelerator. Users can explicitly enable
+software emulation through the Cage Windows TCG setting when WHPX cannot
+initialize on their host.
 
 ---
- pkg/driver/qemu/qemu.go | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+ pkg/driver/qemu/qemu.go | 4 ++++
+ 1 file changed, 4 insertions(+)
 
 diff --git a/pkg/driver/qemu/qemu.go b/pkg/driver/qemu/qemu.go
 --- a/pkg/driver/qemu/qemu.go
 +++ b/pkg/driver/qemu/qemu.go
-@@ -1228,7 +1228,11 @@
+@@ -1228,4 +1228,8 @@
  			return "nvmm"
  		case "windows":
--			return "whpx"
-+			// QEMU 11.1.0's WHPX path fails with
-+			// "failed to initialize whpx: Invalid argument" on supported
-+			// Windows 11 hosts. Use TCG until the bundled QEMU is upgraded;
-+			// a slow VM is preferable to an environment that cannot start.
-+			logrus.Warn("WHPX is disabled for Windows until the bundled QEMU is upgraded; using TCG")
-+			return "tcg"
++			if os.Getenv("CAGE_WINDOWS_TCG") == "1" {
++				logrus.Warn("Windows TCG fallback is enabled by the user; disabling WHPX")
++				return "tcg"
++			}
+ 			return "whpx"
  		}

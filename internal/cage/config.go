@@ -24,6 +24,7 @@ type Config struct {
 	Timezone        string     `json:"timezone"`
 	Locale          string     `json:"locale"`
 	BrowserLanguage string     `json:"browser_language"`
+	WindowsTCG      bool       `json:"windows_tcg,omitempty"`
 	ExitPolicy      ExitPolicy `json:"exit_policy"`
 }
 

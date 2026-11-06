@@ -73,6 +73,21 @@ func NewLima(home, stateDir string) (*Lima, error) {
 	if err := os.Setenv("LIMA_HOME", home); err != nil {
 		return nil, err
 	}
+	if path := os.Getenv(cage.ConfigEnv); path != "" {
+		cfg, err := cage.Load(path)
+		if err != nil {
+			return nil, err
+		}
+		if cfg.WindowsTCG {
+			if err := os.Setenv("CAGE_WINDOWS_TCG", "1"); err != nil {
+				return nil, err
+			}
+		} else if err := os.Unsetenv("CAGE_WINDOWS_TCG"); err != nil {
+			return nil, err
+		}
+	} else if err := os.Unsetenv("CAGE_WINDOWS_TCG"); err != nil {
+		return nil, err
+	}
 	limaHomeSet = home
 	return &Lima{stateDir: stateDir}, nil
 }

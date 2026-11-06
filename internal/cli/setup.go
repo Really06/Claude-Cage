@@ -476,6 +476,7 @@ func (e *app) buildBase(ctx context.Context, in install, disk, memory, cpus int)
 		ha := filepath.Join(LimaHome(e.state), building, "ha.stderr.log")
 		fmt.Fprintf(e.io.Stderr, "Error: Failed to start base VM. Full log: %s\nLima's own log: %s\n", logPath, ha)
 		host.WindowsStartHint(e.io.Stderr, logPath, ha)
+		host.OpenWindowsLogs(e.io.Stderr, ha, filepath.Join(LimaHome(e.state), building, "serial.log"))
 		return 1
 	}
 

@@ -641,6 +641,7 @@ func (s *start) boot() error {
 		ha := paths.Host(filepath.Join(LimaHome(s.state), s.name, "ha.stderr.log"))
 		s.warnf("Error: Failed to start VM '%s'.\n--- Lima's output ---\n%s%v\nFull log: %s", s.name, log.String(), err, ha)
 		host.WindowsStartHint(s.io.Stderr, ha)
+		host.OpenWindowsLogs(s.io.Stderr, ha, paths.Host(filepath.Join(LimaHome(s.state), s.name, "serial.log")))
 		return errStop
 	}
 	s.recordPolicy()

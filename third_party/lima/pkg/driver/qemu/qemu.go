@@ -1240,12 +1240,11 @@ func Accel(arch limatype.Arch) string {
 		case "dragonfly":
 			return "nvmm"
 		case "windows":
-			// QEMU 11.1.0's WHPX path fails with
-			// "failed to initialize whpx: Invalid argument" on supported
-			// Windows 11 hosts. Use TCG until the bundled QEMU is upgraded;
-			// a slow VM is preferable to an environment that cannot start.
-			logrus.Warn("WHPX is disabled for Windows until the bundled QEMU is upgraded; using TCG")
-			return "tcg"
+			if os.Getenv("CAGE_WINDOWS_TCG") == "1" {
+				logrus.Warn("Windows TCG fallback is enabled by the user; disabling WHPX")
+				return "tcg"
+			}
+			return "whpx"
 		}
 	}
 	return "tcg"

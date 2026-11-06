@@ -178,3 +178,20 @@ On a managed laptop, that is a request to your IT department.
 		}
 	}
 }
+
+// OpenWindowsLogs opens the relevant Lima logs after a failed VM start.
+// It is intentionally best-effort: the original startup error remains the
+// authoritative result if the file association cannot be launched.
+func OpenWindowsLogs(w io.Writer, logs ...string) {
+	if runtime.GOOS != "windows" {
+		return
+	}
+	for _, path := range logs {
+		if _, err := os.Stat(path); err != nil {
+			continue
+		}
+		if err := exec.Command("explorer.exe", path).Start(); err != nil {
+			fmt.Fprintf(w, "Warning: could not open VM log %s: %v\n", path, err)
+		}
+	}
+}
