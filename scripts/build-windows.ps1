@@ -77,9 +77,9 @@ try {
     $qemuTarget = Join-Path $resources 'runtime/qemu'
     $qemuStage = Join-Path $stage 'qemu'
     Expand-BuildArchive $qemuArchive $qemuStage $sevenZip
-    if ($dependencies.qemu.layout -eq 'msys2-clang64') {
+    if ($dependencies.qemu.layout -like 'msys2-*') {
         # MSYS2 package archives have used both a toolchain-prefixed root
-        # (clang64/bin/...) and a package-root layout (bin/...) over time.
+        # (ucrt64/bin/...) and a package-root layout (bin/...) over time.
         # Locate the executable instead of assuming the archive prefix.
         $qemuExe = Get-ChildItem -LiteralPath $qemuStage -Filter 'qemu-system-x86_64.exe' -File -Recurse | Select-Object -First 1
         if (-not $qemuExe) { throw 'MSYS2 QEMU package lacks qemu-system-x86_64.exe.' }
