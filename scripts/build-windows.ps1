@@ -102,7 +102,17 @@ try {
             Where-Object { $_.Name -match '^edk2-(?:aarch64|arm|loongarch64|riscv)-.*\.fd$' } | Remove-Item -Force
     }
     foreach ($file in @('qemu-system-x86_64.exe', 'qemu-img.exe')) {
+        if ($file -eq 'qemu-img.exe') { continue }
         if (-not (Test-Path -LiteralPath (Join-Path $qemuTarget $file))) { throw "QEMU archive lacks $file" }
+    }
+    $qemuImageArchive = Get-VerifiedDependency $dependencies.qemuImageUtil $DependencyCache
+    $qemuImageStage = Join-Path $stage 'qemu-image-util'
+    Expand-BuildArchive $qemuImageArchive $qemuImageStage $sevenZip
+    $qemuImageExe = Get-ChildItem -LiteralPath $qemuImageStage -Filter 'qemu-img.exe' -File -Recurse | Select-Object -First 1
+    if (-not $qemuImageExe) { throw 'MSYS2 QEMU image-util package lacks qemu-img.exe.' }
+    Copy-Item -LiteralPath $qemuImageExe.FullName -Destination (Join-Path $qemuTarget 'qemu-img.exe') -Force
+    if (-not (Test-Path -LiteralPath (Join-Path $qemuTarget 'qemu-img.exe'))) {
+        throw 'QEMU image-util package did not provide qemu-img.exe.'
     }
     Remove-Item -LiteralPath (Join-Path $qemuTarget '$PLUGINSDIR') -Recurse -Force -ErrorAction SilentlyContinue
     Remove-Item -LiteralPath (Join-Path $qemuTarget 'qemu-uninstall.exe') -Force -ErrorAction SilentlyContinue

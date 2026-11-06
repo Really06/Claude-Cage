@@ -42,6 +42,14 @@
     "hash": "72ba6064c81408a8f433859502405da7a93e012d2b9b9bcf7f66f07750882b34",
     "layout": "msys2-ucrt64"
   },
+  "qemuImageUtil": {
+    "version": "11.1.3",
+    "file": "mingw-w64-ucrt-x86_64-qemu-image-util-11.1.3-1-any.pkg.tar.zst",
+    "url": "https://repo.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-qemu-image-util-11.1.3-1-any.pkg.tar.zst",
+    "algorithm": "SHA256",
+    "hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "layout": "msys2-ucrt64"
+  },
   "qemuSource": {
     "version": "11.1.3",
     "file": "qemu-11.1.3.tar.xz",
