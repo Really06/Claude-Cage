@@ -114,6 +114,17 @@ try {
     if (-not (Test-Path -LiteralPath (Join-Path $qemuTarget 'qemu-img.exe'))) {
         throw 'QEMU image-util package did not provide qemu-img.exe.'
     }
+    $msysPacman = 'C:\msys64\usr\bin\pacman.exe'
+    $msysBin = 'C:\msys64\ucrt64\bin'
+    if (-not (Test-Path -LiteralPath $msysPacman -PathType Leaf)) {
+        throw 'MSYS2 is required to resolve the bundled QEMU runtime DLLs.'
+    }
+    Invoke-BuildTool $msysPacman @('-S', '--needed', '--noconfirm', 'mingw-w64-ucrt-x86_64-qemu')
+    if (-not (Test-Path -LiteralPath $msysBin -PathType Container)) {
+        throw 'MSYS2 UCRT64 runtime directory is missing.'
+    }
+    Get-ChildItem -LiteralPath $msysBin -Filter '*.dll' -File |
+        Copy-Item -Destination $qemuTarget -Force
     Remove-Item -LiteralPath (Join-Path $qemuTarget '$PLUGINSDIR') -Recurse -Force -ErrorAction SilentlyContinue
     Remove-Item -LiteralPath (Join-Path $qemuTarget 'qemu-uninstall.exe') -Force -ErrorAction SilentlyContinue
     $webviewArchive = Get-VerifiedDependency $dependencies.webview2 $DependencyCache
