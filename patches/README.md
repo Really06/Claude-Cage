@@ -56,6 +56,7 @@ It runs inside the Lima hostagent, which with vz also runs the VM: a panic there
 | `lima/0018-windows-bundled-firmware-path` | lima-vm/lima | not sent | On Windows, prefer the firmware shipped with QEMU. For a non-ASCII directory, start QEMU there and pass the firmware basename to the pflash drive. |
 | `lima/0019-whpx-qemu64-cpu-features` | lima-vm/lima | not sent | When the Windows x64 default is `qemu64`, add the SSSE3, SSE4.1, SSE4.2 and POPCNT features that Windows Hypervisor Platform reports. Preserve explicit CPU choices. |
 | `lima/0020-qemu-wait-channel-close-race` | lima-vm/lima | not sent | Keep capacity for both QEMU and usernet errors, and leave the shared wait channel open until all producers have finished; prevents `panic: send on closed channel` when QEMU exits during startup. |
+| `lima/0021-windows-tcg-fallback` | lima-vm/lima | not sent | Use TCG on Windows while the bundled QEMU 11.1.0 WHPX path fails with `Invalid argument`; restores startup at lower performance until QEMU is upgraded. |
 | `sshocker/0001-rooted-server-readonly-names` | lima-vm/sshocker | fork branch `readonly-names` | The builtin server serves only the mounted directory, and `ReadonlyNames`. |
 | `sshocker/0002-expect-remove` | lima-vm/sshocker | fork branch `expect-remove` | `ExpectRemove`, for 0002 of Lima. |
 | `sshocker/0003-append-fix` | lima-vm/sshocker | not sent | Bug 1. Tests `TestRootedOpenAppend`, `TestRootedOpenMode`. No pkg/sftp dependency: send first. |
