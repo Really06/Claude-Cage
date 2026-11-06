@@ -123,8 +123,10 @@ try {
     $coreSource = Join-Path $stage 'mihomo-source'
     Expand-BuildArchive $coreSourceArchive $coreSource $sevenZip
     $coreTar = @(Get-ChildItem -LiteralPath $coreSource -Filter '*.tar')
-    if ($coreTar.Count -ne 1) { throw 'Unexpected Mihomo source archive layout.' }
-    Expand-BuildArchive $coreTar[0].FullName $coreSource $sevenZip
+    if ($coreTar.Count -gt 1) { throw 'Unexpected Mihomo source archive layout.' }
+    if ($coreTar.Count -eq 1) {
+        Expand-BuildArchive $coreTar[0].FullName $coreSource $sevenZip
+    }
     $coreLicense = Join-Path $coreSource ("mihomo-" + $dependencies.mihomo.version.TrimStart('v') + '/LICENSE')
     if (-not (Test-Path -LiteralPath $coreLicense -PathType Leaf)) { throw 'Mihomo source license is missing.' }
     $coreNotices = Join-Path $resources 'licenses/mihomo'
