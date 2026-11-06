@@ -48,6 +48,14 @@ function Expand-BuildArchive {
     param([string]$Archive, [string]$Destination, [string]$SevenZip)
     New-Item -ItemType Directory -Path $Destination -Force | Out-Null
     Invoke-BuildTool $SevenZip @('x', '-y', '-bso0', '-bsp0', "-o$Destination", $Archive)
+    # 7-Zip may unpack a compressed tar archive in two stages on Windows:
+    # first the compression layer, then the tar payload.
+    $nestedTar = @(Get-ChildItem -LiteralPath $Destination -File -Recurse |
+        Where-Object { $_.Extension -eq '.tar' } | Select-Object -First 1)
+    if ($nestedTar.Count -eq 1) {
+        Invoke-BuildTool $SevenZip @('x', '-y', '-bso0', '-bsp0', "-o$Destination", $nestedTar[0].FullName)
+        Remove-Item -LiteralPath $nestedTar[0].FullName -Force
+    }
 }
 
 function Get-VerifiedGitArchive {
