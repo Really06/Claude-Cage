@@ -78,16 +78,26 @@ try {
     $qemuStage = Join-Path $stage 'qemu'
     Expand-BuildArchive $qemuArchive $qemuStage $sevenZip
     if ($dependencies.qemu.layout -eq 'msys2-clang64') {
-        $qemuRoot = Join-Path $qemuStage 'clang64'
-        if (-not (Test-Path -LiteralPath $qemuRoot -PathType Container)) { throw 'MSYS2 QEMU package lacks its clang64 root.' }
+        # MSYS2 package archives have used both a toolchain-prefixed root
+        # (clang64/bin/...) and a package-root layout (bin/...) over time.
+        # Locate the executable instead of assuming the archive prefix.
+        $qemuExe = Get-ChildItem -LiteralPath $qemuStage -Filter 'qemu-system-x86_64.exe' -File -Recurse | Select-Object -First 1
+        if (-not $qemuExe) { throw 'MSYS2 QEMU package lacks qemu-system-x86_64.exe.' }
+        $qemuRoot = Split-Path (Split-Path $qemuExe.FullName -Parent) -Parent
+        if (-not (Test-Path -LiteralPath (Join-Path $qemuRoot 'share') -PathType Container)) {
+            $qemuRoot = Split-Path $qemuExe.DirectoryName -Parent
+        }
         Move-Item -LiteralPath $qemuRoot -Destination $qemuTarget
     } else {
         Move-Item -LiteralPath $qemuStage -Destination $qemuTarget
     }
     # Ship the x64 VM only, with its original firmware, DLLs and notices.
     Get-ChildItem -LiteralPath $qemuTarget -Filter 'qemu-system-*.exe' | Where-Object { $_.Name -ne 'qemu-system-x86_64.exe' } | Remove-Item -Force
-    Get-ChildItem -LiteralPath (Join-Path $qemuTarget 'share') -File |
-        Where-Object { $_.Name -match '^edk2-(?:aarch64|arm|loongarch64|riscv)-.*\.fd$' } | Remove-Item -Force
+    $qemuShare = Join-Path $qemuTarget 'share'
+    if (Test-Path -LiteralPath $qemuShare -PathType Container) {
+        Get-ChildItem -LiteralPath $qemuShare -File |
+            Where-Object { $_.Name -match '^edk2-(?:aarch64|arm|loongarch64|riscv)-.*\.fd$' } | Remove-Item -Force
+    }
     foreach ($file in @('qemu-system-x86_64.exe', 'qemu-img.exe')) {
         if (-not (Test-Path -LiteralPath (Join-Path $qemuTarget $file))) { throw "QEMU archive lacks $file" }
     }
