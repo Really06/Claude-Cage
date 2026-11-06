@@ -88,7 +88,7 @@ try {
             $qemuRoot = Split-Path $qemuExe.DirectoryName -Parent
         }
         New-Item -ItemType Directory -Path $qemuTarget -Force | Out-Null
-        Copy-Item -LiteralPath (Join-Path $qemuRoot '*') -Destination $qemuTarget -Recurse -Force
+        Get-ChildItem -LiteralPath $qemuRoot -Force | Copy-Item -Destination $qemuTarget -Recurse -Force
     } else {
         Move-Item -LiteralPath $qemuStage -Destination $qemuTarget
     }
