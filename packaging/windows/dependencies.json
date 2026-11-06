@@ -39,7 +39,7 @@
     "file": "mingw-w64-ucrt-x86_64-qemu-11.1.3-1-any.pkg.tar.zst",
     "url": "https://repo.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-qemu-11.1.3-1-any.pkg.tar.zst",
     "algorithm": "SHA256",
-    "hash": "bb771ba7e402bea6da140dafab9ecd68473c532055de1f71cdfd5a4181614ff7",
+    "hash": "72ba6064c81408a8f433859502405da7a93e012d2b9b9bcf7f66f07750882b34",
     "layout": "msys2-ucrt64"
   },
   "qemuSource": {
