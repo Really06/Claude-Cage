@@ -83,12 +83,14 @@ try {
         # Locate the executable instead of assuming the archive prefix.
         $qemuExe = Get-ChildItem -LiteralPath $qemuStage -Filter 'qemu-system-x86_64.exe' -File -Recurse | Select-Object -First 1
         if (-not $qemuExe) { throw 'MSYS2 QEMU package lacks qemu-system-x86_64.exe.' }
-        $qemuRoot = Split-Path (Split-Path $qemuExe.FullName -Parent) -Parent
-        if (-not (Test-Path -LiteralPath (Join-Path $qemuRoot 'share') -PathType Container)) {
-            $qemuRoot = Split-Path $qemuExe.DirectoryName -Parent
-        }
+        $qemuBin = $qemuExe.DirectoryName
+        $qemuRoot = Split-Path $qemuBin -Parent
         New-Item -ItemType Directory -Path $qemuTarget -Force | Out-Null
-        Get-ChildItem -LiteralPath $qemuRoot -Force | Copy-Item -Destination $qemuTarget -Recurse -Force
+        Get-ChildItem -LiteralPath $qemuBin -Force | Copy-Item -Destination $qemuTarget -Recurse -Force
+        $qemuShareSource = Join-Path $qemuRoot 'share'
+        if (Test-Path -LiteralPath $qemuShareSource -PathType Container) {
+            Copy-Item -LiteralPath $qemuShareSource -Destination $qemuTarget -Recurse -Force
+        }
     } else {
         Move-Item -LiteralPath $qemuStage -Destination $qemuTarget
     }
