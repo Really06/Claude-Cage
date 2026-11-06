@@ -1,0 +1,30 @@
+Subject: [PATCH] qemu: avoid closing the shared wait channel while configuring usernet
+
+QEMU's wait goroutine and the usernet configuration goroutine both report
+startup errors through qWaitCh. Closing qWaitCh from the QEMU wait goroutine
+allows the usernet goroutine to panic when it reports an error after QEMU
+exits.
+
+Keep room for both results and leave the channel open. The caller only needs
+the first error, while both producers can finish without a send-on-closed-
+channel panic.
+
+---
+ pkg/driver/qemu/qemu_driver.go | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/pkg/driver/qemu/qemu_driver.go b/pkg/driver/qemu/qemu_driver.go
+--- a/pkg/driver/qemu/qemu_driver.go
++++ b/pkg/driver/qemu/qemu_driver.go
+@@ -553,9 +553,10 @@
+ 	}
+ 	l.qCmd = qCmd
+-	l.qWaitCh = make(chan error, 1)
++	// Both QEMU's wait goroutine and the network configuration goroutine may
++	// report an error. Keep room for both and do not close the channel from one
++	// producer while the other can still send.
++	l.qWaitCh = make(chan error, 2)
+ 	go func() {
+-		defer close(l.qWaitCh)
+ 		defer cancel()
+ 		err := qCmd.Wait()

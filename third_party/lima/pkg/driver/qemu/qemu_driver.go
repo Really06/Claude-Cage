@@ -553,9 +553,11 @@ func (l *LimaQemuDriver) Start(ctx context.Context) (chan error, error) {
 		return nil, err
 	}
 	l.qCmd = qCmd
-	l.qWaitCh = make(chan error, 1)
+	// Both QEMU's wait goroutine and the network configuration goroutine may
+	// report an error. Keep room for both and do not close the channel from one
+	// producer while the other can still send.
+	l.qWaitCh = make(chan error, 2)
 	go func() {
-		defer close(l.qWaitCh)
 		defer cancel()
 		err := qCmd.Wait()
 		if l.usernetStop != nil {
