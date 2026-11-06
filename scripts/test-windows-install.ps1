@@ -28,7 +28,14 @@ Assert-PersonalData
 if (-not (Test-Path -LiteralPath (Join-Path $target 'Cage.exe'))) { throw 'Installer did not create Cage.exe.' }
 Invoke-BuildTool (Join-Path $target 'resources/cage.exe') @('--help')
 Invoke-BuildTool (Join-Path $target 'resources/mihomo.exe') @('-v')
-Invoke-BuildTool (Join-Path $target 'resources/runtime/qemu/qemu-system-x86_64.exe') @('--version')
+$qemuExecutable = Join-Path $target 'resources/runtime/qemu/qemu-system-x86_64.exe'
+try {
+    Invoke-BuildTool $qemuExecutable @('--version')
+} catch {
+    $dumpbin = Get-Command dumpbin.exe -ErrorAction SilentlyContinue
+    if ($dumpbin) { & $dumpbin.Source '/DEPENDENTS' $qemuExecutable }
+    throw
+}
 Invoke-BuildTool (Join-Path $target 'resources/runtime/openssh/ssh.exe') @('-V')
 $savedProfile = $env:CLAUDE_CAGE_CONFIG
 try {
