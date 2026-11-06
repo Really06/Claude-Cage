@@ -30,7 +30,7 @@ if ($Release) {
     if (-not $IsWindows -or $env:CAGE_WINDOWS_CERT_SHA1 -notmatch '^[0-9A-Fa-f]{40}$') { throw 'Release packaging requires Windows and CAGE_WINDOWS_CERT_SHA1.' }
     if (Test-Path -LiteralPath (Join-Path $AppDirectory 'DEVELOPMENT-BUILD.txt')) { throw 'Use build-windows.ps1 -Release before packaging a release.' }
     if (-not $QemuSourceArchive -or -not (Test-Path -LiteralPath $QemuSourceArchive -PathType Leaf)) {
-        throw 'Release packaging requires -QemuSourceArchive containing the corresponding patched QEMU and bundled library sources. A generic upstream QEMU tarball is not the source for the Weilnetz build.'
+        throw 'Release packaging requires -QemuSourceArchive containing the QEMU 11.1.3 source archive used for the bundled MSYS2 package.'
     }
     Invoke-BuildTool $sevenZip @('t', '-bso0', '-bsp0', $QemuSourceArchive)
     $signTool = Get-SigningTool
@@ -44,7 +44,7 @@ if ($Release) {
 New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
 # Verify source material before the expensive installer compression.
 $dependencies = Get-Content -LiteralPath (Join-Path $repository 'packaging/windows/dependencies.json') -Raw | ConvertFrom-Json
-$qemuTar = Get-VerifiedGitArchive $dependencies.qemuSource (Join-Path $repository '_output/windows-deps')
+$qemuTar = Get-VerifiedDependency $dependencies.qemuSource (Join-Path $repository '_output/windows-deps')
 $suffix = if ($Release) { '' } else { '-unsigned' }
 $artifact = Join-Path $OutputDirectory "Cage-$version-windows-amd64-setup$suffix.exe"
 $manifest = Join-Path $OutputDirectory 'uninstall-files.nsh'

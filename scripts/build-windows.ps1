@@ -75,7 +75,15 @@ try {
     }
     $qemuArchive = Get-VerifiedDependency $dependencies.qemu $DependencyCache
     $qemuTarget = Join-Path $resources 'runtime/qemu'
-    Expand-BuildArchive $qemuArchive $qemuTarget $sevenZip
+    $qemuStage = Join-Path $stage 'qemu'
+    Expand-BuildArchive $qemuArchive $qemuStage $sevenZip
+    if ($dependencies.qemu.layout -eq 'msys2-clang64') {
+        $qemuRoot = Join-Path $qemuStage 'clang64'
+        if (-not (Test-Path -LiteralPath $qemuRoot -PathType Container)) { throw 'MSYS2 QEMU package lacks its clang64 root.' }
+        Move-Item -LiteralPath $qemuRoot -Destination $qemuTarget
+    } else {
+        Move-Item -LiteralPath $qemuStage -Destination $qemuTarget
+    }
     # Ship the x64 VM only, with its original firmware, DLLs and notices.
     Get-ChildItem -LiteralPath $qemuTarget -Filter 'qemu-system-*.exe' | Where-Object { $_.Name -ne 'qemu-system-x86_64.exe' } | Remove-Item -Force
     Get-ChildItem -LiteralPath (Join-Path $qemuTarget 'share') -File |
