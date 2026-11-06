@@ -417,7 +417,10 @@ func (e *app) buildBase(ctx context.Context, in install, disk, memory, cpus int)
 	resume := false
 	if os.Getenv("CLAUDE_CAGE_CONFIG") != "" {
 		previous, err := b.Get(ctx, building)
-		resume = err == nil && previous != nil
+		// A failed Lima start is reported as Broken. It cannot be resumed:
+		// the next start would reuse the same failed host-agent/QEMU state.
+		// Keep resuming only usable stopped or running partial builds.
+		resume = err == nil && previous != nil && previous.Status != vm.Broken
 	}
 	if !resume && !e.deleteVM(ctx, building) {
 		return 1

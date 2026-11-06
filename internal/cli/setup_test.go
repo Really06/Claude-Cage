@@ -310,3 +310,16 @@ func TestCageSetupResumesExistingBuild(t *testing.T) {
 		t.Fatalf("partial build was recreated instead of resumed: %s", log)
 	}
 }
+
+func TestCageSetupRecreatesBrokenBuild(t *testing.T) {
+	t.Setenv("CLAUDE_CAGE_CONFIG", filepath.Join(t.TempDir(), "config.json"))
+	te := newTestEnv(t, vmtest.New())
+	te.fake.VMs[building] = &vm.Instance{Name: building, Status: vm.Broken}
+	if code := te.setupBase([]string{"setup", "--preinstall=none"}); code != 0 {
+		t.Fatalf("broken build was not recreated: %s", te.out())
+	}
+	log := te.fake.CallLog()
+	if !strings.Contains(log, "delete base-building\ncreate base-building") {
+		t.Fatalf("broken build was resumed instead of recreated: %s", log)
+	}
+}
